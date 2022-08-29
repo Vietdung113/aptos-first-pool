@@ -6,6 +6,7 @@ module vault::Vault {
 
     /// Error codes
     const ENOT_MODULE_OWNER: u64 = 0;
+    const MODULE_PAUSED: u64 = 1;
 
 
     struct State has key, store {
@@ -18,13 +19,17 @@ module vault::Vault {
     }
 
     // deposit token
-    public entry fun deposit<CoinType: drop> (account: &signer, amount: u64, witness: CoinType) {
+    public entry fun deposit<CoinType: drop> (account: &signer, amount: u64, witness: CoinType) acquires State {
+        let is_paused = get_state();
+        assert!(is_paused == false, MODULE_PAUSED);
         BasicCoin::transfer<CoinType>(account, ModuleAddr, amount, witness);
         BasicCoin::mint<CoinType>(signer::address_of(account), amount);
     } 
 
     // withdraw token
-    public entry fun withdraw<CoinType: drop> (account: &signer, owner: &signer, amount: u64, witness: CoinType){
+    public entry fun withdraw<CoinType: drop> (account: &signer, owner: &signer, amount: u64, witness: CoinType) acquires State{
+        let is_paused = get_state();
+        assert!(is_paused == false, MODULE_PAUSED);
         BasicCoin::transfer<CoinType>(owner, signer::address_of(account), amount, witness);
         BasicCoin::burn<CoinType>(signer::address_of(account), amount);
     }

@@ -52,6 +52,8 @@ module vault::VaultTest {
 
     #[test(account = @0x1234, deployer = @0x1103)]
     public entry fun deposit_1(account: &signer, deployer: &signer){
+        Vault::init(deployer);
+
         // mint 1000 token for user
         setup_and_mint(account, 1000);
 
@@ -67,6 +69,8 @@ module vault::VaultTest {
 
     #[test(account = @0x1234, owner = @0x1103)]
     public fun deposit_and_withdraw(account: &signer, owner: &signer) {
+        Vault::init(owner);
+
         setup_and_mint(account, 1000);
 
         Vault::create_pool<Coin1>(owner);
@@ -84,6 +88,7 @@ module vault::VaultTest {
     #[test(account = @0x1234, owner = @0x1103)]
     #[expected_failure]
     public fun deposit_and_withdraw_2(account: &signer, owner: &signer) {
+        Vault::init(owner);
         setup_and_mint(account, 1000);
 
         Vault::create_pool<Coin1>(owner);
@@ -98,6 +103,20 @@ module vault::VaultTest {
         Vault::withdraw<Coin1>(account, owner, 100, Coin1 {});
     }
 
+    #[test(account = @0x1234, owner = @0x1103)]
+    #[expected_failure]
+    public fun deposit_and_withdraw_and_paused(account: &signer, owner: &signer) {
+        Vault::init(owner);
+        setup_and_mint(account, 1000);
 
+        Vault::create_pool<Coin1>(owner);
+        let b = Vault::balance_of<Coin1>(signer::address_of(owner));
+        assert!(b == 0, 0);
+
+        let a = Vault::balance_of<Coin1>(signer::address_of(account));
+        assert!(a == 1000,1);
+        Vault::pause(owner);
+        Vault::deposit<Coin1>(account, 100, Coin1 {});
+    }
 
 }
