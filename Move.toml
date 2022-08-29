@@ -3,8 +3,7 @@ name = "vault-test"
 version = "0.0.0"
 
 [dependencies]
-MoveStdlib = { git = "https://github.com/move-language/move.git", subdir = "language/move-stdlib", rev = "main" }
-
+AptosFramework = { local = "/home/dungdv/source/Aptos/aptos-core/aptos-move/framework/aptos-framework" }
 [addresses]
 std =  "0x1"
 vault = "0x1103"
